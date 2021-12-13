@@ -37,6 +37,7 @@ data(garden_harvest) # part of the gardenR R package
 
 
 # Installation
+THIS PART IS NOT VERY INTERESTING
 
 Make sure you have the newest versions of R and RStudio. R should be 4.1.0 "Camp Pontanezen" or higher (in case you are wondering, the interesting version names come from [Peanut cartoons](https://livefreeordichotomize.com/2018/04/23/r-release-names/)) and RStudio should be 1.4.1717 or higher.
 
@@ -70,6 +71,7 @@ These are some steps you should take to set yourself up for an easier time using
   * Don't be afraid to use the internet to search for answers to your questions. I do this all the time. And when I say all the time, I mean every single time I use R. I will try to show you examples of doing this in class.
 
 # Tour of RStudio
+THIS PART TOO
 
 Watch the video below for a tour of RStudio. Most of what is covered in the video is also written out in the details of this section.
 
