@@ -22,6 +22,9 @@ library(readr)
 library(dplyr)
 library(maps)
 library(mapproj)
+library(gganimate)
+library(gifski)
+library(transformr)
 ```
 
 # Loading the new dataset 
@@ -34,7 +37,7 @@ share_of_population_with_cancer = data.frame(lapply(share_of_population_with_can
 }))
 colnames(share_of_population_with_cancer)[1] <- "region" #Give the same name for the country in the two datasets
 colnames(share_of_population_with_cancer)[4] <- "cancer" #Dropping the complicated name given by the data frame
-df = filter(share_of_population_with_cancer, share_of_population_with_cancer$Year == 2017) #We filter down to a specific year, in this case 2017
+#df = filter(share_of_population_with_cancer, share_of_population_with_cancer$Year == 2017) #We filter down to a specific year, in this case 2017
 ```
 
 # Create the actual map that we will use
@@ -43,33 +46,38 @@ We will use the ggplo2 package for that
 ```{r}
 mapdata = map_data("world") #Used to take the latitude and longitude of the countries 
 mapp <- mapdata %>%
-  left_join(df, by = "region") #merge the two datasets
+  left_join(share_of_population_with_cancer, by = "region") #merge the two datasets
 mapp2 = mapp %>% 
   filter(!is.na(mapp$cancer)) #dealing with NA
 mapp2$cancer <- as.numeric(mapp2$cancer) #changing the value to numeric for plotting
+mapp2$Year <- as.numeric(mapp2$Year) #changing the value to numeric for animation
 
 ```
 
 # Building the map
 Here we create a static map with the focus on the Europe
 
-```{r}
+# Animation
+Now we proceed with the animation
 
-mapp2 %>%
+```{r}
+pplot = mapp2 %>%
   ggplot(aes(long, lat, group = subregion)) +
   geom_map(
     aes(map_id = region),
     map = mapdata,
     color = "black", fill = "gray30", size = 0.3
   ) +
-  coord_map("ortho", orientation = c(39, 0, 0)) +
+  coord_map(proj="ortho", orientation = c(20, 10, 0)) +
   geom_polygon(aes(group = group, fill = cancer), color = "black") +
   scale_fill_gradient2(low = "blue", mid = "white", high = "red" ) +
   theme_minimal() +
+  transition_time(Year) +
   labs(
-    title = "Share of population with cancer in 2017",
+    title = "Share of population with cancer in 2017, Eurocentered",
     x = "", y = "", fill = ""
-  )
-
+    ) 
+  pplot
 ```
+
 
