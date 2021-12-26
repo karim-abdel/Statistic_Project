@@ -1,5 +1,5 @@
 ---
-title: "Data visualization"
+title: "Data cleaning"
 author: "Lorenzo Tarricone"
 date: "23/12/2021"
 output: 
@@ -18,41 +18,42 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ## Souces used
 The sources used for the datas are:
 
-Cancer -> [Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2017 (GBD 2017) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2018](http://ghdx.healthdata.org/gbd-results-tool)
-Air_pollution -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
-Alcool -> [Food and Agriculture Organization of the United Nations (FAO) (2017)](http://www.fao.org/faostat/en/?#data/)
-GDP_per_capta -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
-Obesity -> [World Health Organization (WHO)](http://apps.who.int/gho/data/view.main.REGION2480A?lang=en)
-Old_age_dependency -> [World Development Indicators - World Bank](http://data.worldbank.org/data-catalog/world-development-indicators)
-Smoking -> [Nationally representative sources, survey data](http://ghdx.healthdata.org/record/global-smoking-prevalence-and-cigarette-consumption-1980-2012)
+- Cancer -> [Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2017 (GBD 2017) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2018](http://ghdx.healthdata.org/gbd-results-tool)
+- Air_pollution -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
+- Alcool -> [Food and Agriculture Organization of the United Nations (FAO) (2017)](http://www.fao.org/faostat/en/?#data/)
+- GDP_per_capta -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
+- Obesity -> [World Health Organization (WHO)](http://apps.who.int/gho/data/view.main.REGION2480A?lang=en)
+- Old_age_dependency -> [World Development Indicators - World Bank](http://data.worldbank.org/data-catalog/world-development-indicators)
+- Smoking -> [Nationally representative sources, survey data](http://ghdx.healthdata.org/record/global-smoking-prevalence-and-cigarette-consumption-1980-2012)
 
 ## Description of the variables
 
-Cancer: Share of total population with any form of cancer, measured as the age-standardized percentage. This
+**Cancer**: Share of total population with any form of cancer, measured as the age-standardized percentage. This
 share has been age-standardized assuming a constant age structure to compare prevalence between
 countries and through time.
 
-Air_pollution: Population-weighted average level of exposure to concentrations of suspended
+**Air_pollution**: Population-weighted average level of exposure to concentrations of suspended
 particles measuring less than 2.5 microns in diameter (PM2.5).
 Exposure is measured in micrograms of PM2.5 per cubic metre (µg/m³).
 
-Alcool:Average per capita consumption of alcoholic beverages, measured in kilograms per
+**Alcool**: Average per capita consumption of alcoholic beverages, measured in kilograms per
 year. Data is based on per capita food supply at the consumer level, but does not
 account for food waste at the consumer level
 
-GDP per capta: Measured in constant international-$
+**GDP per capta**: Measured in constant international-$
 
-Obesity: Obesity is defined as having a body-mass index (BMI) equal to or greater than 30. BMI is a person's
+**Obesity**: Obesity is defined as having a body-mass index (BMI) equal to or greater than 30. BMI is a person's
 weight in kilograms divided by his or her height in metres squared
 
-Old age Dependency: This is the ratio of the number of people older than 64 relative to the
+**Old age Dependency**: This is the ratio of the number of people older than 64 relative to the
 number of people in the working-age (15-64 years). Data are shown as
 the proportion of dependents per 100 working-age population.
 
-Smoking: Share of population who smoke every day
+**Smoking**: Share of population who smoke every day
 
 
 ## Cleaning 
+We start by loading the library and the .csv files needed:
 
 ```{r}
 library(readr)
