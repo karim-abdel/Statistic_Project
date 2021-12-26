@@ -98,5 +98,6 @@ Here is what the final dataset looks like:
 
 ```{r, echo= FALSE}
 Cancer_final
+write.csv(Cancer_final, "Cancer_final.csv", row.names=FALSE, quote=FALSE) #to save the file into our environment
 ```
 
