@@ -80,6 +80,3 @@ pplot = mapp2 %>%
   pplot
 ```
 
-Now we are going to make the globe rotate
-
-bla bla bla 
