@@ -1,0 +1,62 @@
+---
+title: "Multivariate Linear Regression.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+For the porpouse of trying to explain our hypotesis, we are going to carry on a multivariate linear regression. 
+```{r cars}
+mydata = read.csv("Cancer_final.csv")
+data3 = na.omit(mydata)
+
+```
+Now let's regress cancer against all the covariates that we have.
+```{r}
+fit = lm( Cancer ~ Alcool + GDP + Obesity + Age + Smoking, data = data3)
+fit
+summary(fit)
+
+
+```
+From just these  results, we can see various things: the value of the Adjusted R-Squared is satisfying, and then this model fits pretty well the data. Also, all the variables seems to explain pretty well the number of cancer cases in each country.
+On the other hand, if we try for example just to consider data coming from just one year, the results are pretty surprising
+
+```{r}
+data4 = subset(data3, Year == "2005")
+fit2 = lm( Cancer ~ Alcool + GDP + Obesity + Age + Smoking, data = data4)
+fit2
+summary(fit2)
+
+#fin = subset(mydata, select = c(Entity,Year,Cancer,Smoking))
+#fan = na.omit(fin)
+#fit2 = lm (Cancer ~ Smoking, data= fin)
+#fit2
+#summary(fit2)
+#plot(Cancer ~ Smoking, data=fin)
+#abline(fit2, col="blue", lwd=2)
+```
+In this case it seems that some of the variables do not correlate well! We can try the conclusion that the subset of the dataset we are considering ( just one year ) is not satisfying to take some satisfactory conclusion.
+```{r}
+fin = subset(mydata,Year=="2005", select = c(Entity,Cancer,Smoking))
+fan = na.omit(fin)
+fit3 = lm (Cancer ~ Smoking, data= fin)
+fit3
+summary(fit3)
+plot(Cancer ~ Smoking, data=fin)
+abline(fit3, col="blue", lwd=2)
+```
+Plotting just a simple linear regression, we can see and find also from the p-value that there is a strong correllation between cancer and smoking. Anyway, for what we can see from the R-Squared value, the model does not explain pretty well our data.
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
