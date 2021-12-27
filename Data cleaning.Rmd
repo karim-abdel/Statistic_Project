@@ -59,6 +59,9 @@ We start by loading the library and the .csv files needed:
 library(readr)
 library(tidyverse)
 library(gganimate)
+library(ggthemes)
+library(gapminder)
+library(zoo)
 
 Cancer <- read_csv("Datasets/Cancer.csv")
 Air_pollution <- read_csv("Datasets/Air pollution.csv")
@@ -67,6 +70,7 @@ GDP_per_capta <- read_csv("Datasets/GDP per capta.csv")
 Obesity <- read_csv("Datasets/Obesity.csv")
 Old_age_dependency_ratio <- read_csv("Datasets/Old age dependency ratio.csv")
 Smoking <- read_csv("Datasets/Smoking.csv")
+Population <- read_csv("Datasets/population-since-1800.csv")
 ```
  
 We proceed by taking the explanatory variable data set (Cancer) and adding the covariates as columns other columns, to do that we use the use the libraby "dplyr" as it makes it very easy to do and readable
@@ -81,6 +85,7 @@ Cancer5 = left_join(Cancer4, Old_age_dependency_ratio, by = c("Entity", "Code", 
 Cancer6 = left_join(Cancer5, Smoking, by = c("Entity", "Code", "Year"))
 Cancer_final = Cancer6
 rm("Cancer1", "Cancer2", "Cancer3", "Cancer4", "Cancer5", "Cancer6")
+rm("Air_pollution", "Alcool", "Cancer", "GDP_per_capta", "Obesity", "Old_age_dependency_ratio", "Smoking")
 ```
 
 We now proceed by renaming the columns. This will make all the manipulations of the dataframe more readable:
@@ -100,5 +105,28 @@ Here is what the final dataset looks like:
 ```{r, echo= FALSE}
 Cancer_final
 write.csv(Cancer_final, "Cancer_final.csv", row.names=FALSE, quote=FALSE) #to save the file into our environment
+```
+
+# Data visualization (animated)
+
+We will now take each of the covariate and plot it against the explanatory variable. We will use an animation to also show hot datapoints are changing through time and this will give a more complete (and for sure more pleasant) overview of the datas involved
+
+```{r}
+Cancergraph = left_join(Cancer_final, Population, by = c("Entity", "Code", "Year"))
+Cancergraph = na.locf(Cancergraph$Smoking)
+Cancergraph = na.locf(Cancergraph$AirPoll)
+Cancergraph = na.locf(Cancergraph$Alcool)
+Cancergraph = na.locf(Cancergraph$GDP)
+Cancergraph = na.locf(Cancergraph$Obesity)
+Cancergraph = na.locf(Cancergraph$`Population (historical estimates)`)
+graphPoll = Cancergraph %>%
+  ggplot(aes(x = Cancergraph$AirPoll, y = Cancergraph$Cancer, color = "red", size = Cancergraph$`Population (historical estimates)`)) +
+  geom_point(alpha = 0.9, stroke = 0) +
+  theme_fivethirtyeight()+
+  scale_size(range = c(2,12), guide = "none") +
+  scale_color_brewer(palette = "Set2", guide = "none") +
+  labs(title = "Cancer incidence vs Air Pollution") +
+  labs(x = "Smokingg", y = "Cancerr")
+graphPoll
 ```
 
