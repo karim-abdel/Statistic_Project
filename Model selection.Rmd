@@ -1,0 +1,62 @@
+---
+title: "Model selection"
+author: "Lorenzo Tarricone"
+date: "23/12/2021"
+output: 
+  html_document:
+    theme: paper
+    toc: true
+    df_print: paged
+    code_download: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+We start by importing the data we will need for the model selection and loading some useful libraries. We will then create our linear model 
+
+```{r}
+library(olsrr) #This stands for Ordinary Least SquaRe Regression and it has the tools needed
+Cancermodelsel = read.csv("Cancer_final_noNA.csv")
+model = lm( Cancer ~ Smoking + Obesity + GDP + Age + AirPoll + Alcool, data = data3)
+summary(model)
+```
+
+Using testing methods we proceed with a Step-up method:
+
+```{r}
+frwfit <- ols_step_forward_p(model, pent = 0.05)
+frwfit
+```
+
+The selection led us to retain all our covariates but the one about Smoke. To cross check it, let's use the symmetrical method, the Step-down method:
+
+```{r}
+bkwfit <- ols_step_backward_p(model, prem = 0.05)
+bkwfit
+```
+
+As you can see we got the same result here.  
+To do one last check using testing methods we use a mixed method to allow variables that were added in previous steps to be excluded in succeding steps (this wasn't allowed in the simple forward/step-up method)
+
+```{r}
+bothfit <- ols_step_both_p(model, pent = 0.05, prem = 0.05)
+bothfit
+```
+But this again yield the same result as the one we got with the step foreward method. This seems to suggest a model of four variables that is cutting our Smoking and Obesity as these two risk factor are removed by all three of our greedy methods.
+Because we don't want to have missed something we do another test, this time testing all possible subsets of our covariates. We will now underline other critera that are used in model selection, this time leveraging on results in the field of information theory. The function plot will give us back the data frame containing all the important informations
+
+```{r}
+allsub <- ols_step_all_possible(model)
+allsub
+plot(allsub)
+```
+
+Reading this is impossible, we use the function best_subset to get the best model for every single parameter, ranging from one to six (the maximum number of parameters in the model). The plot function here is giving us graphs showing how the various best fitting models indicators are changing when we change the numbers of parameters in the model  
+
+```{r}
+allsub2 <- ols_step_best_subset(model)
+allsub2
+plot(allsub2)
+```
+The result is totally different from the one obtained above. Here six out of seven criteria yield that the more adequate model is the one containing all six covariates. 
