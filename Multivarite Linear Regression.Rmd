@@ -1,6 +1,9 @@
 ---
 title: "Multivariate Linear Regression.Rmd"
-output: html_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -57,7 +60,7 @@ data3 = na.omit(mydata)
 fit = lm( Cancer ~  Age + Smoking + GDP + Obesity + Alcool , data = data3)
 fit
 summary(fit)
-
+confint(fit)
 
 ```
 From just these  results, we can see various things: the value of the Adjusted R-Squared is satisfying, and then this model fits pretty well the data, telling us there is a quite good linear relationship. Also, all the variables seems to explain pretty well the number of cancer case: all of the p-values are statistically significant!
@@ -78,5 +81,6 @@ summary(fit2)
 #plot(Cancer ~ Smoking, data=fin)
 #abline(fit2, col="blue", lwd=2)
 ```
+
 In this case it seems that some of the variables do not correlate well! We can try the conclusion that the subset of the dataset we are considering ( just one year ) is not satisfying to take some satisfactory conclusion. This makes perfectly sense considering the context we are working on, since we should take in consideration also the time dependence. `Let's take  an extreme case as an example: if all of the population of a country starts to smoke instantaneously, the cancer cases for some years will remain quite constant, and if analyzing the data relating to just a short period of time, you would see that there is not a positive correlation between cancer and smoking, which does not make any sense! This test that we just carried out was just a demonstration of the fact that we should be very careful to draw conclusions instinctively.
 
