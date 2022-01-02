@@ -1,0 +1,95 @@
+---
+title: "Multivariate Linear Regression"
+author: "Lollo"
+date: "1/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We are now going to perform a multivariate linear regression, trying to examine the relationship between some explanatory variable and one response variable. Regarding our case, we are going to take in consideration as explanatory variables some factors belonging to various categories that we considered interesting to analyze and to help us to find some interesting correlation with the number of people affected by cancer worldwide. We decided to use data of approximately 150 countries, for approximately 20 years. In this way we will be able to do not miss some trend or to do not being deceived from some outliers years or random trends. Coming back to the explanatory variables they are divided in 3 categories, each one with some sub-categories: environment(Air Pollution), lifestyle(Smoking, Obesity, Alcohol), socioeconomic/demographic condition (GDP of the country and Age). We are trying then to see which of these variables explain better the data that we have. Before performing the actual linear regression, let’s analyze the data in a visual way, plotting the cancer cases against each of the covariates.
+
+
+
+```{r}
+mydata = read.csv("Cancer_final.csv")
+data3 = na.omit(mydata)
+
+plot(Cancer ~ Smoking, data=data3)
+
+plot(Cancer ~ Age, data=data3)
+
+plot(Cancer ~ Obesity, data=data3)
+
+plot(Cancer ~ Alcool, data=data3)
+
+plot(Cancer ~ GDP, data=data3)
+
+plot(Cancer ~ AirPoll, data=data3)
+
+#plot(Age ~ GDP, data=data3)
+```
+
+From this simple data visualization, we can see that we can identify some sort of relation between cancer cases and some of our explanatory variables, still as not strong as we imagined before doing those plots. We can see that age is the factor which presents a stronger correlation visually. We also have some outliers, which are Canada and US, but we will analyze this further in the limitation of our study. Now, let’s proceed with the last step before performing the actual multiple linear regression: we will see if the assumptions on the data are met. Let’s check for the normality and for the homoscedasticity of the residuals.
+
+
+
+```{r}
+#Normality of the residuals
+model = lm( Cancer~ Smoking + Obesity + GDP + Age + AirPoll + Alcool, data = data3)
+ols_plot_resid_qq(model)
+
+
+ols_test_normality(model)
+ols_test_correlation(model)
+## [1] 0.8482072
+#ols_plot_resid_hist(model)
+kop = residuals.lm(model)
+hist(kop, breaks = 50)
+
+
+#homoscedasticity of the residuals
+plot(model)
+
+```
+
+ Let’s analyze each of the test we performed above, and let’s see which conclusion we can take from what we observed. About the model, we can see that the p-value of the tests is satisfying for all the tests, thus we can reject the null hypothesis that the errors are not normally distributed. Also, for what concern the correlation between observed residuals and expected residuals under normality, the value is satisfactory to assume a strong correlation. The qq-plot shows that the data fit pretty well the diagonal line, exceptions made for a little deviation near the top. Lastly, to check the homoscedasticity we see the plots produced by the function plot(model). All the plots presents a satisfactory result, thus we can conclude that the assumption about homoscedasticity of the result is respected.
+
+Let’s now perform and interpret the result of the multiple linear regression.
+
+```{r}
+mydata = read.csv("Cancer_final.csv")
+data3 = na.omit(mydata)
+
+#plot(AirPoll~Obesity, data=data3)
+fit = lm( Cancer ~  Age + Smoking + GDP + Obesity + Alcool , data = data3)
+fit
+
+summary(fit)
+```
+
+From just these results, we can see various things: the value of the Adjusted R-Squared is satisfying, and then this model fits pretty well the data, telling us there is a quite good linear relationship. Also, all the variables seems to explain pretty well the number of cancer case: all of the p-values are statistically significant! The value that more explain our variable is the Age(not surprisingly I would say). On the other hand, if we try for example just to consider data coming from just one year, the results are pretty surprising
+
+
+```{r}
+data4 = subset(data3, Year == "2005")
+fit2 = lm( Cancer ~ Alcool + GDP + Obesity + Age + Smoking + AirPoll, data = data4)
+fit2
+
+summary(fit2)
+
+#fin = subset(mydata, select = c(Entity,Year,Cancer,Smoking))
+#fan = na.omit(fin)
+#fit2 = lm (Cancer ~ Smoking, data= fin)
+#fit2
+#summary(fit2)
+#plot(Cancer ~ Smoking, data=fin)
+#abline(fit2, col="blue", lwd=2)
+
+
+```
+
+In this case it seems that some of the variables do not correlate well! We can try the conclusion that the subset of the dataset we are considering ( just one year ) is not satisfying to take some satisfactory conclusion. This makes perfectly sense considering the context we are working on, since we should take in consideration also the time dependence. `Let’s take an extreme case as an example: if all of the population of a country starts to smoke instantaneously, the cancer cases for some years will remain quite constant, and if analyzing the data relating to just a short period of time, you would see that there is not a positive correlation between cancer and smoking, which does not make any sense! This test that we just carried out was just a demonstration of the fact that we should be very careful to draw conclusions instinctively.
+
