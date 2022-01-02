@@ -36,20 +36,20 @@ model = lm( Cancer~ Smoking + Obesity + GDP + Age + AirPoll + Alcool, data = dat
 ols_plot_resid_qq(model)
 ols_test_normality(model)
 ols_test_correlation(model)
-#ols_plot_resid_hist(model)
+ols_plot_resid_hist(model)
 kop = residuals.lm(model)
 hist(kop, breaks = 50)
 
 
 #homoscedasticity of the residuals
 plot(model)
-
+summary(model)
 ```
-Let's analyze each of the test we performed above, and let's see which conclusion we can take from what we observed. About the model, we can see that the p-value of the tests is satisfying for all the tests, thus we can reject the null hypothesis that the errors are not normally distributed. Also, for what concern the correlation between observed residuals and expected residuals under normality, the value is satisfactory to assume a strong correlation. The qq-plot shows that the data fit pretty well the diagonal line, exceptions made for a little deviation near the top. 
+Let's analyze each of the test we performed above, and let's see which conclusion we can take from what we observed. *About the model, we can see that the p-value of the tests is satisfying for all the tests, thus we can reject the null hypothesis that the errors are not normally distributed*. Also, for what concern the correlation between observed residuals and expected residuals under normality, the value is satisfactory to assume a strong correlation (?). The qq-plot shows that the data fit pretty well the diagonal line, exceptions made for a little deviation near the top. 
 Lastly, to check the homoscedasticity we see the plots produced by the function plot(model).
 All the plots presents a satisfactory result, thus we can conclude that the assumption about homoscedasticity of the result is respected.
 
-
+CORREGGERE QUI L'INTERPRETAZIONE
 
 Let's now perform and interpret the result of the multiple linear regression. 
 ```{r cars}
