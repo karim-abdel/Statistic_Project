@@ -222,7 +222,7 @@ anim_save("Age Visual Animation.gif")
 
 
 graphSmoke = Cancergraph %>%
-  ggplot(aes(x = GDP, y = Cancer, color = continent, size = `Population (historical estimates)`)) +
+  ggplot(aes(x = Smoking, y = Cancer, color = continent, size = `Population (historical estimates)`)) +
   geom_point(alpha = 0.9, stroke = 0) +
   scale_size(range = c(2,12), guide = "none") +
   scale_color_brewer(palette = "Set2") +
@@ -235,7 +235,7 @@ graphSmoke = Cancergraph %>%
   labs (subtitle = "Year:{round(frame_time)}") 
  shadow_wake(wake_length = 0.05)
 animate(graphSmoke, height = 500, width = 800, fps = 30, duration = 15, end_pause = 60, res = 100)
-anim_save("Smoking Visual Animation.gif")
+anim_save("Smoking Visual Animation 3.gif")
 
 
 ```
@@ -247,6 +247,6 @@ knitr::include_graphics("Alcool Visual Animation.gif")
 knitr::include_graphics("GDP Visual Animation.gif")
 knitr::include_graphics("Obesity Visual Animation.gif")
 knitr::include_graphics("Age Visual Animation.gif")
-knitr::include_graphics("Smoking Visual Animation 2.gif")
+knitr::include_graphics("Smoking Visual Animation 3.gif")
 ```
 
