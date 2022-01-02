@@ -1,0 +1,143 @@
+---
+title: "Data cleaning"
+author: "Lorenzo Tarricone"
+date: "23/12/2021"
+output: 
+  html_document:
+    theme: paper
+    toc: true
+    df_print: paged
+    code_download: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+# Here we want to integrate in a single csv file all the relevant datas that we collected from our sources 
+
+## Souces used
+The sources used for the datas are:
+
+- Cancer -> [Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2017 (GBD 2017) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2018](http://ghdx.healthdata.org/gbd-results-tool)
+- Air_pollution -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
+- Alcool -> [Food and Agriculture Organization of the United Nations (FAO) (2017)](http://www.fao.org/faostat/en/?#data/)
+- GDP_per_capta -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
+- Obesity -> [World Health Organization (WHO)](http://apps.who.int/gho/data/view.main.REGION2480A?lang=en)
+- Old_age_dependency -> [World Development Indicators - World Bank](http://data.worldbank.org/data-catalog/world-development-indicators)
+- Smoking -> [Nationally representative sources, survey data](http://ghdx.healthdata.org/record/global-smoking-prevalence-and-cigarette-consumption-1980-2012)
+
+## Description of the variables
+
+**Cancer**: Share of total population with any form of cancer, measured as the age-standardized percentage. This
+share has been age-standardized assuming a constant age structure to compare prevalence between
+countries and through time.
+
+**Air_pollution**: Population-weighted average level of exposure to concentrations of suspended
+particles measuring less than 2.5 microns in diameter (PM2.5).
+Exposure is measured in micrograms of PM2.5 per cubic metre (µg/m³).
+
+**Alcool**: Average per capita consumption of alcoholic beverages, measured in kilograms per
+year. Data is based on per capita food supply at the consumer level, but does not
+account for food waste at the consumer level
+
+**GDP per capta**: Measured in constant international-$
+
+**Obesity**: Obesity is defined as having a body-mass index (BMI) equal to or greater than 30. BMI is a person's
+weight in kilograms divided by his or her height in metres squared
+
+**Old age Dependency**: This is the ratio of the number of people older than 64 relative to the
+number of people in the working-age (15-64 years). Data are shown as
+the proportion of dependents per 100 working-age population.
+
+**Smoking**: Share of population who smoke every day
+
+
+## Cleaning 
+We start by loading the library and the .csv files needed:
+
+```{r}
+library(readr)
+library(tidyverse)
+library(gganimate)
+library(ggthemes)
+library(gapminder)
+library(zoo)
+
+Cancer <- read_csv("Datasets/Cancer.csv")
+Air_pollution <- read_csv("Datasets/Air pollution.csv")
+Alcool <- read_csv("Datasets/Alcool.csv")
+GDP_per_capta <- read_csv("Datasets/GDP per capta.csv")
+Obesity <- read_csv("Datasets/Obesity.csv")
+Old_age_dependency_ratio <- read_csv("Datasets/Old age dependency ratio.csv")
+Smoking <- read_csv("Datasets/Smoking.csv")
+Population <- read_csv("Datasets/population-since-1800.csv")
+countryContinent <- read_csv("Datasets/countryContinent.csv")
+```
+ 
+We proceed by taking the explanatory variable data set (Cancer) and adding the covariates as columns other columns, to do that we use the use the libraby "dplyr" as it makes it very easy to do and readable
+
+```{r}
+Continent = countryContinent %>% select(country, continent)
+Continentt = rename(Continent, Entity = country)
+Cancer1 = left_join(Cancer, Air_pollution, by = c("Entity", "Code", "Year"))
+Cancer2 = left_join(Cancer1, Alcool, by = c("Entity", "Code", "Year"))
+Cancer3 = left_join(Cancer2, GDP_per_capta, by = c("Entity", "Code", "Year"))
+Cancer4 = left_join(Cancer3, Obesity, by = c("Entity", "Code", "Year"))
+Cancer5 = left_join(Cancer4, Old_age_dependency_ratio, by = c("Entity", "Code", "Year"))
+Cancer6 = left_join(Cancer5, Smoking, by = c("Entity", "Code", "Year"))
+Cancer7 = left_join(Cancer6, Continentt, by = "Entity")
+Cancer_final = Cancer7
+
+rm("Cancer1", "Cancer2", "Cancer3", "Cancer4", "Cancer5", "Cancer6", "Cancer7")
+rm("Air_pollution", "Alcool", "Cancer", "GDP_per_capta", "Obesity", "Old_age_dependency_ratio", "Smoking", "Continent", "Continentt")
+```
+
+We now proceed by renaming the columns. This will make all the manipulations of the dataframe more readable:
+
+```{r}
+colnames(Cancer_final)[4] <- "Cancer"
+colnames(Cancer_final)[5] <- "AirPoll"
+colnames(Cancer_final)[6] <- "Alcool"
+colnames(Cancer_final)[7] <- "GDP"
+colnames(Cancer_final)[8] <- "Obesity"
+colnames(Cancer_final)[9] <- "Age"
+colnames(Cancer_final)[10] <- "Smoking"
+```
+
+Here is what the final dataset looks like:
+
+```{r, echo= FALSE}
+Cancer_final
+write.csv(Cancer_final, "Cancer_final.csv", row.names=FALSE, quote=FALSE) #to save the file into our environment
+```
+
+# Data visualization (animated)
+
+We will now take each of the covariate and plot it against the explanatory variable. We will use an animation to also show hot datapoints are changing through time and this will give a more complete (and for sure more pleasant) overview of the datas involved
+
+```{r}
+Cancergraph = left_join(Cancer_final, Population, by = c("Entity", "Code", "Year"))
+Cancergraph$Smoking = na.locf(Cancergraph$Smoking)
+Cancergraph$AirPoll = na.locf(Cancergraph$AirPoll)
+Cancergraph$Alcool = na.locf(Cancergraph$Alcool)
+#Cancergraph$GDP = na.locf(Cancergraph$GDP)
+Cancergraph$Obesity = na.locf(Cancergraph$Obesity)
+Cancergraph$`Population (historical estimates)` = na.locf(Cancergraph$`Population (historical estimates)`)
+graphPoll = Cancergraph %>%
+  ggplot(aes(x = AirPoll, y = Cancer, color = continent, size = `Population (historical estimates)`)) +
+  geom_point(alpha = 0.9, stroke = 0) +
+  scale_size(range = c(2,12), guide = "none") +
+  scale_y_log10() +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "Cancer incidence vs Air Pollution", 
+       x = "Smoking", 
+       y = "Cancer log10",
+       color = "Continent",
+       caption = "Source: Our World in Data") +
+  transition_time(Year) +
+  labs (subtitle = "Year:{round(frame_time)}") 
+  shadow_wake(wake_length = 0.05)
+animate(graphPoll, height = 500, width = 800, fps = 30, duration = 15, end_pause = 60, res = 100)
+anim_save("Smoking Visual Animation.gif")
+```
+
