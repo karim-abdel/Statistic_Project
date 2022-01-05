@@ -39,11 +39,12 @@ From this simple data visualization, we can see that we can identify some sort o
 ```{r}
 #Normality of the residuals
 model = lm( Cancer~ Smoking + Obesity + GDP + Age + AirPoll + Alcool, data = data3)
-ols_plot_resid_qq(model)
+#ols_plot_resid_qq(model)
+fit2 = lm(Cancer ~ AirPoll, data = data3)
+summary(fit2)
 
-
-ols_test_normality(model)
-ols_test_correlation(model)
+#ols_test_normality(model)
+#ols_test_correlation(model)
 ## [1] 0.8482072
 #ols_plot_resid_hist(model)
 kop = residuals.lm(model)
