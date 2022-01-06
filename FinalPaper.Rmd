@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Introduction
-Life-Expectancy has constantly increased over the last centuries, and it has never been so high as nowadays. Medicine has make great strides, eradicating and finding cures for a lot of mortal diseases. Perhaps, there are still other big challenges that we have to face up to, and one of those is cancer. Cancer is a leading cause of death all over the world, accounting for almost 10 milion deaths in 2020 (https://www.who.int/news-room/fact-sheets/detail/cancer). This is the reason why we thought that would be very interesting to analyze the principal factors that causes this disease, taking in consideration some macro-groups of variables: environment, life-style and socioeconomic/demographic condtions. 
+Life-Expectancy has constantly increased over the last centuries, and it has never been so high as nowadays. Medicine has make great strides, eradicating and finding cures for a lot of mortal diseases. Perhaps, there are still others big challenges that we have to face up to, and one of those is cancer. Cancer is a leading cause of death all over the world, accounting for almost 10 milion deaths in 2020 (https://www.who.int/news-room/fact-sheets/detail/cancer). This is the reason why we thought that would be very interesting to analyze the principal factors that causes this disease, taking in consideration some macro-groups of variables: environment, life-style and socioeconomic/demographic condtions. We will try using the statistical tools to carry out this study. First we will buil the data set using a union of data we find, and to summarize them in a unique one. In this way we will have data coming from more than 150 countries over 25 year, helping us to conduct our statistical research. After that, and some data cleaning (that will be necessary) we will perform a multivariate linear regression, and trying to drive out some conclusion from that result. After that, for the part of testing we will carry on a model selection, using the step-down and the step-up method: we prefer those 2 since we don't have a huge number of covariates trying to explain our data, and thus those model are prefered. We will then take the conclusion, indicating the limitations of our study and extrapolating what we learned during the realization of this experiment
 
 ##Dataset and Data Cleaning
 EXPLAIN HOW YOU CONSTRUCTED THE DATASET, WHERE WE HAVE TAKEN IT , WE WE CHOOSE IT, AND THEN LEAVE BELOW THOSE DESCRIPTION OF THE VARIABLES
@@ -95,6 +95,7 @@ Cancer_final
 write.csv(Cancer_final, "Cancer_final.csv", row.names=FALSE, quote=FALSE) #to save the file into our environment
 ```
 LET'S SEE IF IT IS NECESSARY TO LEAVE ALL THIS CODE IN THE PDF, WOULD BE NICE JUST TO EXPLAIN HOW THE DATA CLEANING HAS BEEN CARRIED OUT
+WRITE NA.OMIT HERE
 
 ## Multivariate Linear Regression
 We are now going to perform a multivariate linear regression, trying to examine the relationship between some explanatory variable and one response variable. Regarding our case, we are going to take in consideration as explanatory variables some factors belonging to various categories that we considered interesting to analyze and to help us to find some interesting correlation with the number of people affected by cancer worldwide. We decided to use data of approximately 150 countries, for approximately 20 years. In this way we will be able to do not miss some trend or to do not being deceived from some outliers years or random trends. Coming back to the explanatory variables they are divided in 3 categories, each one with some sub-categories: environment(Air Pollution), lifestyle(Smoking, Obesity, Alcohol), socioeconomic/demographic condition (GDP of the country and Age). We are trying then to see which of these variables explain better the data that we have. Before performing the actual linear regression, let’s analyze the data in a visual way, plotting the cancer cases against each of the covariates.
@@ -103,7 +104,7 @@ We are now going to perform a multivariate linear regression, trying to examine 
 
 ```{r}
 mydata = read.csv("Cancer_final.csv")
-data3 = na.omit(mydata)
+data5 = na.omit(mydata)
 
 plot(Cancer ~ Smoking, data=data3)
 
@@ -120,67 +121,43 @@ plot(Cancer ~ AirPoll, data=data3)
 #plot(Age ~ GDP, data=data3)
 ```
 
-From this simple data visualization, we can see that we can identify some sort of relation between cancer cases and some of our explanatory variables, still as not strong as we imagined before doing those plots. We can see that age is the factor which presents a stronger correlation visually. We also have some outliers, which are Canada and US, but we will analyze this further in the limitation of our study. Now, let’s proceed with the last step before performing the actual multiple linear regression: we will see if the assumptions on the data are met. Let’s check for the normality and for the homoscedasticity of the residuals.
+From this simple data visualization, we can see that we can identify some sort of relation between cancer cases and some of our explanatory variables, still as not strong as we imagined before doing those plots. We can see that age is the factor which presents a stronger correlation visually. Suprisingly air pollution seems to have a negative correlation, but we will dicuss this in the limitations of our study. We also have some outliers, which are Canada and US. Being cancer causes such a complicated and intricate thing, is actually quite difficult to really understand why those 2 countries have a such high number of cases. We can suppose that those two countries perform an more intense screening activity, but this goes beyond the scope of this study. We will just proceed to delete those two countries from our data set. Now, let’s proceed with the last step before performing the actual multiple linear regression: we will see if the assumptions on the data are met. Let’s check for the normality and for the homoscedasticity of the residuals.
 
 
 
 ```{r}
+
+# Delete USA and Canada from the data set
+data3 = subset(data5, Entity != "USA" || Entity != "Canada")
+
 #Normality of the residuals
 model = lm( Cancer~ Smoking + Obesity + GDP + Age + AirPoll + Alcool, data = data3)
-#ols_plot_resid_qq(model)
-fit2 = lm(Cancer ~ AirPoll, data = data3)
-summary(fit2)
 
+#Perform Testing for normality of residuals
 ols_test_normality(model)
-#ols_test_correlation(model)
-## [1] 0.8482072
-#ols_plot_resid_hist(model)
+
+#plot histogram of residuals
 kop = residuals.lm(model)
 hist(kop, breaks = 50)
 
-
-#homoscedasticity of the residuals
+#Check graphically using the function plot
 plot(model)
 
 ```
 
- Let’s analyze each of the test we performed above, and let’s see which conclusion we can take from what we observed. About the model, we can see that the p-value of the tests is low for all of them, thus we can reject the null hypothesis that the errors are normally distributed. Also, for what concern the correlation between observed residuals and expected residuals under normality, the value is satisfactory to assume a strong correlation. The qq-plot shows that the data fit pretty well the diagonal line, exceptions made for a little deviation near the top. Lastly, to check the homoscedasticity we see the plots produced by the function plot(model). All the plots presents a satisfactory result, thus we can conclude that the assumption about homoscedasticity of the result is respected.
+ Let’s analyze each of the test we performed above, and let’s see which conclusion we can take from what we observed. About the model, we can see that the p-value of the tests we performed is low for all of them, thus we can reject the null hypothesis that the errors are normally distributed. This is exactly as we imagined: the data set is made by more or less  1000 data points, thus violating this assumption was something that we expected for. 
+Instead, trying to see the situation graphically, the situations seems a bit better. The qq-plot shows that the data fit not that badly the diagonal line, exceptions made for a little deviation near the top. Analyzing furthermore one graph, we see that plot of the residuals against the fitted values approximate more or less a straight line. The residuals are thus not that bad, but if we want to be strict we will not be able to take out a strong conclusion from the experiment we will carry on.
 
 Let’s now perform and interpret the result of the multiple linear regression.
 
 ```{r}
-mydata = read.csv("Cancer_final.csv")
-data3 = na.omit(mydata)
-
-#plot(AirPoll~Obesity, data=data3)
 fit = lm( Cancer ~  Age + Smoking + GDP + Obesity + Alcool , data = data3)
 fit
-
 summary(fit)
 ```
 
-From just these results, we can see various things: the value of the Adjusted R-Squared is satisfying, and then this model fits pretty well the data, telling us there is a quite good linear relationship. Also, all the variables seems to explain pretty well the number of cancer case: all of the p-values are statistically significant! The value that more explain our variable is the Age(not surprisingly I would say). On the other hand, if we try for example just to consider data coming from just one year, the results are pretty surprising
-
-
-```{r}
-data4 = subset(data3, Year == "2005")
-fit2 = lm( Cancer ~ Alcool + GDP + Obesity + Age + Smoking + AirPoll, data = data4)
-fit2
-
-summary(fit2)
-
-#fin = subset(mydata, select = c(Entity,Year,Cancer,Smoking))
-#fan = na.omit(fin)
-#fit2 = lm (Cancer ~ Smoking, data= fin)
-#fit2
-#summary(fit2)
-#plot(Cancer ~ Smoking, data=fin)
-#abline(fit2, col="blue", lwd=2)
-
-
-```
-
-In this case it seems that some of the variables do not correlate well! We can try the conclusion that the subset of the dataset we are considering ( just one year ) is not satisfying to take some satisfactory conclusion. This makes perfectly sense considering the context we are working on, since we should take in consideration also the time dependence. `Let’s take an extreme case as an example: if all of the population of a country starts to smoke instantaneously, the cancer cases for some years will remain quite constant, and if analyzing the data relating to just a short period of time, you would see that there is not a positive correlation between cancer and smoking, which does not make any sense! This test that we just carried out was just a demonstration of the fact that we should be very careful to draw conclusions instinctively.
+From just these results, we can see various things: the value of the Adjusted R-Squared is satisfying, and then this model fits pretty well the data, telling us there is a quite good 
+relationship with the covariates we indicated: our factors explain a 81% variation in cancer cases! We are actually considering the Adjusted R-Squared since we are performing a multivariate linear regression, and thus the number of factors we include in our model is relevant. In fact we know that the simply value of R-Squared can just increase when adding a factor, also if it is a completely random one.Also, all the variables seems to explain pretty well the number of cancer case: all of the p-values are statistically significant! We can see that wr have a stronger correlation for Age and GDP, as also our initial plots suggested.
 
 ## Model Selection
 We start by importing the data we will need for the model selection and loading some useful libraries. We will then create our linear model 
@@ -217,15 +194,15 @@ But this again yield the same result as the one we got with the step foreward me
 
 ##Limitations of the study
 
-
 ##Conclusions
-
-
+Based on the results of our study, we can conclude that our model explains quite well the variance in the data, and that we are able to conclude that various factors prevales in the increasing of cancer cases in a country. Older and richer countries (a thing that overlaps often) presents a lot of cancer cases, as countries with an higher consumption of alcohol and cigarettes above the mean. However, our study has a lot of limitations that we have to indicate. First, as we have to construct the data set by our own, lead to some difficulties: we joined some data sets toghether into a table, but obviously we had some missing data : it is not easy to have the data for all the countries for more than 25 year for all those factors. Also, countries with more missing datas are not random, but it depends on the lack of statistical capacity that they encounter about those various problems, and as expected there was a redundancy in the countries with missing data, altering a bit the " equilibrium" of our data. Besides that, we have taken into considerations just 6 factors to try to explain cancer incidence, but as we know it is a much more difficult research question: heritage, other factors of the lifestyle, other environmental element, access to the healthcare system, prevention of the country and a lot more plays a role in developing a cancer or not. Also, it is not an 'immediate' disease: factors of risk sum up over the years, as the evolution of medicine, and thus end up in a complicated and intricate situation to analyze. Diving in into some details, we also had a quite surprising result : the correlation between cancer cases and air pollution seems strongly negative, from the plot we see. It is difficult to explain such a result, but it may be that since the worst quality of air is in less developed countries(eg. Nigeria, Pakistan, India...), it may be that other factors as the age of the population or GDP, that are low values in those country typically, has a more stronger influence on the actual number of cancer cases, ending in this counter-intuitive
+result.
 
 
 
 ##BIBlIOGRAPHY AND REFERENCES
 https://www.who.int/news-room/fact-sheets/detail/cancer
+
 The sources used for the datas are:
 
 - Cancer -> [Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2017 (GBD 2017) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2018](http://ghdx.healthdata.org/gbd-results-tool)
