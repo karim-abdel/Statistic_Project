@@ -1,0 +1,417 @@
+---
+title: "FinalPaper_lollo"
+author: "Lollo"
+date: "1/6/2022"
+output: html_document
+    theme: paper
+    toc: true
+    df_print: paged
+    code_download: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+# Introduction and research question 
+
+Life-Expectancy has constantly increased over the last centuries, and it has never been so high as nowadays. Medicine has taken great strides forward, eradicating and finding cures for a lot of mortal diseases. Having said that, there are still other big challenges that we have to face in medicine and one of those is for sure cancer. [Cancer is a leading cause of death all over the world, accounting for almost 10 milion deaths in 2020](https://www.who.int/news-room/fact-sheets/detail/cancer). 
+This is the reason why we thought that would be very interesting to analyze the principal factors that, according to state-of-the-art scientific research, cause this disease. We also wanted to divide these factors in some macro-groups of variables: environmental, life-style related and socio-economical/demographic. 
+
+Our analysis (purely statistical) aims to verify if it is indeed possible using data about the selected risk factors to predict the share of people with cancer in a given year and in a given country. Moreover, we tried to improve our all-inclusive model by finding out the best model out of the above mentioned factors
+
+#Dataset, Data Cleaning and Data Visualization
+
+##Source
+
+Our research started by searching out on some reliable websites what are the leading causes of cancer and dividing them into the macro-categories. To do that we adopted the [WHO official website](https://www.who.int/news-room/fact-sheets/detail/cancer) and we selected the following risk factors:
+
+*ENVIRONMENTAL*: Air pollution 
+*LIFE-STYLE RELATED*: Alcohol consumption, Tobacco consumption, Obesity 
+*SOCIO-ECONOMICAL/DEMOGRAPHIC*: GDP, Share of old people
+
+(IMPORTANT DISCLAMER: of course the factors defined under "Socio-Economical/Demographic" cannot be considered to __cause__ cancer, but as we will see they turn out to be very useful to model cancer all over the world and over time)
+
+## Description of the variables
+
+We built our dataset selecting by merging different csv files all taken from the same source, that is called ["Our world in data"](https://ourworldindata.org/). This is by itself collecting datasets from verified sources and the precise reference to each factor is given in the sitography at the end of the paper. Here we provide a complete description of the variable we decided to use in our model.
+
+**Cancer**: Share of total population with any form of cancer, measured as the age-standardized percentage. This
+share has been age-standardized assuming a constant age structure to compare prevalence between
+countries and through time.
+
+**Air_pollution**: Population-weighted average level of exposure to concentrations of suspended
+particles measuring less than 2.5 microns in diameter (PM2.5).
+Exposure is measured in micro grams of PM2.5 per cubic meter (µg/m³).
+
+**Alcohol**: Average per capta consumption of alcoholic beverages, measured in kilograms per
+year. Data is based on per capta food supply at the consumer level, but does not
+account for food waste at the consumer level
+
+**GDP per capta**: Measured in constant international-$
+
+**Obesity**: Obesity is defined as having a body-mass index (BMI) equal to or greater than 30. BMI is a person's
+weight in kilograms divided by his or her height in metres squared
+
+**Old age Dependency**: This is the ratio of the number of people older than 64 relative to the
+number of people in the working-age (15-64 years). Data are shown as
+the proportion of dependents per 100 working-age population.
+
+**Smoking**: Share of population who smoke every day
+
+##Constructing the table
+We started by loading all the different csv files. Then we took the column we were interested in and we glued them together. After some other little manipulation (see the R code for that) here is how part of the final table looks like (the complete table with the N.A.s results in a dimension of 6468x11):
+
+```{r, echo = FALSE}
+##We start by loading some useful libraries that we will need during this process
+
+library(readr) #Used to read the csv
+library(tidyverse) #Contains a lot of useful packages to clean the datas
+library(gganimate) #To create animated plots
+library(ggthemes) #To select some nice themes 
+library(zoo) #To fill the N.A. values 
+library(grid) #To display plots into a grid
+library(gridExtra) #To display plots into a grid
+
+##We now load the row csv files what we need to merge 
+
+Cancer <- read_csv("Datasets/Cancer.csv")
+Air_pollution <- read_csv("Datasets/Air pollution.csv")
+Alcool <- read_csv("Datasets/Alcool.csv")
+GDP_per_capta <- read_csv("Datasets/GDP per capta.csv")
+Obesity <- read_csv("Datasets/Obesity.csv")
+Old_age_dependency_ratio <- read_csv("Datasets/Old age dependency ratio.csv")
+Smoking <- read_csv("Datasets/Smoking.csv")
+Population <- read_csv("Datasets/population-since-1800.csv")
+countryContinent <- read_csv("Datasets/countryContinent.csv")
+
+#We proceed by taking the explanatory variable data set (Cancer) and adding the covariates as columns other columns, to do that we use the use the libraby "dplyr" as it makes it very easy to do and readable
+
+Continent = countryContinent %>% select(country, continent)
+Continentt = rename(Continent, Entity = country)
+Cancer1 = left_join(Cancer, Air_pollution, by = c("Entity", "Code", "Year"))
+Cancer2 = left_join(Cancer1, Alcool, by = c("Entity", "Code", "Year"))
+Cancer3 = left_join(Cancer2, GDP_per_capta, by = c("Entity", "Code", "Year"))
+Cancer4 = left_join(Cancer3, Obesity, by = c("Entity", "Code", "Year"))
+Cancer5 = left_join(Cancer4, Old_age_dependency_ratio, by = c("Entity", "Code", "Year"))
+Cancer6 = left_join(Cancer5, Smoking, by = c("Entity", "Code", "Year"))
+Cancer7 = left_join(Cancer6, Continentt, by = "Entity")
+Cancer_final = Cancer7
+
+rm("Cancer1", "Cancer2", "Cancer3", "Cancer4", "Cancer5", "Cancer6", "Cancer7")
+rm("Air_pollution", "Alcool", "Cancer", "GDP_per_capta", "Obesity", "Old_age_dependency_ratio", "Smoking", "Continent", "Continentt", "countryContinent")
+
+#We now proceed by renaming the columns. This will make all the manipulations of the dataframe more readable:
+
+colnames(Cancer_final)[4] <- "Cancer"
+colnames(Cancer_final)[5] <- "AirPoll"
+colnames(Cancer_final)[6] <- "Alcool"
+colnames(Cancer_final)[7] <- "GDP"
+colnames(Cancer_final)[8] <- "Obesity"
+colnames(Cancer_final)[9] <- "Age"
+colnames(Cancer_final)[10] <- "Smoking"
+
+Cancer_final
+write.csv(Cancer_final, "Cancer_final.csv", row.names=FALSE, quote=FALSE) #to save the file into our environment
+```
+
+##Data Visualization
+Now we will proceed with some plotting. Again, for the detailed process for making this graphs please refer to the R script. You may also want to check our our file in Html format, in which we made some nice animation to be able to display the evolution in time of the variables.
+
+We start by displaying the variable we are interested to explain, that is the share of population with any form of cancer. We chose to plot the most recent year in our data frame, that is 2017. 
+As we can clearly see form the plot below the countries in which are suffering more (in percentage) of cancer are USA, Canada, Australia and Greenland. These states are followed by European countries. Asian and African countries are the ones with relatively less cases of cancer in percentage. 
+Here we could argue that a big downside of this picture is the fact that different countries have different ability in the process of screening. As the WHO writes "Late-stage presentation and lack of access to diagnosis and treatment are common, particularly in low- and middle-income countries". We will further discuss this limitation in the dedicated section. 
+(Countries for which data were not available are omitted from the map, but those are luckily few)
+
+```{r, echo = FALSE}
+#We read the file needed
+share_of_population_with_cancer <- read_csv("Cancer.csv")  #read the file 
+share_of_population_with_cancer = data.frame(lapply(share_of_population_with_cancer, function(x) {
+  gsub("United States", "USA", x) #correction needed for the mapping 
+}))
+colnames(share_of_population_with_cancer)[1] <- "region" #Give the same name for the country in the two datasets
+colnames(share_of_population_with_cancer)[4] <- "cancer" #Dropping the complicated name given by the data frame
+
+# Create the actual map that we will use
+#We will use the ggplo2 package for that
+
+mapdata = map_data("world") #Used to take the latitude and longitude of the countries 
+mapp <- mapdata %>%
+  left_join(share_of_population_with_cancer, by = "region") #merge the two datasets
+mapp2 = mapp %>% 
+  filter(!is.na(mapp$cancer)) #dealing with NA
+mapp2$cancer <- as.numeric(mapp2$cancer) #changing the value to numeric for plotting
+mapp2$Year <- as.numeric(mapp2$Year) #changing the value to numeric for animation
+```
+
+
+```{r, eval = FALSE, echo= FALSE}
+# Building the map
+#Here we create a static map
+ggplot( data = mapp2, aes(long, lat, group = subregion)) +
+  geom_map(
+    aes(map_id = region),
+    map = mapdata,
+    color = "black", fill = "gray30", size = 0.3
+  ) +
+  geom_polygon(aes(group = group, fill = cancer), color = "black") +
+  scale_fill_gradient2(low = "blue", high = "red" , midpoint = 1.0355583) +
+  theme_minimal() +
+  labs(
+    title = "Share of population with cancer in 2017",
+    x = "", y = "", fill = ""
+    ) +
+  theme_bw()
+ggsave("Share of people with cancer in 2017.jpg")
+```
+
+```{r, echo= FALSE}
+knitr::include_graphics("Share of people with cancer in 2017.jpg") #We use it to display the graphic
+```
+
+Now we are going to explore the dataset by plotting each selected factor against the Cancer one to start having an idea of some possible relation. Because we selected them as "risk factors" we would expect to see some positive correlation going on. To be consistent with what we have done above we again plot the graphs relative to the year 2017. We also used some libraries to make plots nicer by coloring the points according to the continent and by changing the size according to the population of the country. 
+The result is the following:
+
+```{r, echo = FALSE}
+Cancergraph = left_join(Cancer_final, Population, by = c("Entity", "Code", "Year"))
+Cancergraph$Smoking = na.locf(Cancergraph$Smoking)
+Cancergraph$AirPoll = na.locf(Cancergraph$AirPoll)
+Cancergraph$Alcool = na.locf(Cancergraph$Alcool)
+Cancergraph$GDP = na.locf(Cancergraph$GDP, fromLast = TRUE)
+Cancergraph$Age = na.locf(Cancergraph$Age)
+Cancergraph$Obesity = na.locf(Cancergraph$Obesity)
+Cancergraph$`Population (historical estimates)` = na.locf(Cancergraph$`Population (historical estimates)`)
+
+
+#Here we plots
+
+Cancergraph = subset(Cancergraph, Year == "2017")
+graphPoll = Cancergraph %>%
+  ggplot(aes(x = AirPoll, y = Cancer, color = continent, size = `Population (historical estimates)`)) +
+  geom_point(alpha = 0.9, stroke = 0) +
+  scale_size(range = c(2,12), guide = "none") +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "Cancer incidence vs Air Pollution", 
+       x = "Air pollution exposure ", 
+       y = "Share of people with Cancer",
+       color = "Continent",
+       caption = "Source: Our World in Data") +
+  labs (subtitle = "Year: 2017}") 
+
+
+
+graphAlco = Cancergraph %>%
+  ggplot(aes(x = Alcool, y = Cancer, color = continent, size = `Population (historical estimates)`)) +
+  geom_point(alpha = 0.9, stroke = 0) +
+  scale_size(range = c(2,12), guide = "none") +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "Cancer incidence vs Alcool consumption", 
+       x = "Alcool consumed", 
+       y = "Share of people with Cancer",
+       color = "Continent",
+       caption = "Source: Our World in Data") +
+  labs (subtitle = "Year: 2017") 
+
+
+
+graphGDP = Cancergraph %>%
+  ggplot(aes(x = GDP, y = Cancer, color = continent, size = `Population (historical estimates)`)) +
+  geom_point(alpha = 0.9, stroke = 0) +
+  scale_size(range = c(2,12), guide = "none") +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "Cancer incidence vs GDP", 
+       x = "GDP per capta", 
+       y = "Share of people with Cancer",
+       color = "Continent",
+       caption = "Source: Our World in Data") +
+  labs (subtitle = "Year: 2017") 
+
+
+graphObes = Cancergraph %>%
+  ggplot(aes(x = Obesity, y = Cancer, color = continent, size = `Population (historical estimates)`)) +
+  geom_point(alpha = 0.9, stroke = 0) +
+  scale_size(range = c(2,12), guide = "none") +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "Cancer incidence vs Obesity", 
+       x = "Share of Obese people", 
+       y = "Share of people with Cancer",
+       color = "Continent",
+       caption = "Source: Our World in Data") +
+  labs (subtitle = "Year: 2017") 
+
+
+graphAge = Cancergraph %>%
+  ggplot(aes(x = Age, y = Cancer, color = continent, size = `Population (historical estimates)`)) +
+  geom_point(alpha = 0.9, stroke = 0) +
+  scale_size(range = c(2,12), guide = "none") +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "Cancer incidence vs Age", 
+       x = "Old people ratio", 
+       y = "Share of people with Cancer",
+       color = "Continent",
+       caption = "Source: Our World in Data") +
+  labs (subtitle = "Year: 2017") 
+
+
+graphSmoke = Cancergraph %>%
+  ggplot(aes(x = Smoking, y = Cancer, color = continent, size = `Population (historical estimates)`)) +
+  geom_point(alpha = 0.9, stroke = 0) +
+  scale_size(range = c(2,12), guide = "none") +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "Cancer incidence vs Smoking", 
+       x = "Number of Smokers", 
+       y = "Share of people with Cancer",
+       color = "Continent",
+       caption = "Source: Our World in Data") +
+  labs (subtitle = "Year: 2017") 
+
+
+pplot = ggarrange(graphAge, graphAlco, graphGDP, graphObes, graphPoll, graphSmoke + rremove("x.text"), ncol = 2, nrow = 3)
+
+knitr::include_graphics("Final plot.png") #This is the visualization of pplot but in a clearer way 
+```
+
+
+Our hypothesis is confirmed by these graphs. The only problem is the one related to Air pollution. Our explanation for that is that *missing part here*
+Now we will proceed using the technique of linear regression to give a quantitative description of what we just observed.
+
+## Multivariate Linear Regression
+
+We are now going to perform a multivariate linear regression, trying to examine the relationship between some explanatory variable and one response variable. Regarding our case, we are going to take in consideration as explanatory variables some factors belonging to various categories that we considered interesting to analyze and to help us to find some interesting correlation with the number of people affected by cancer worldwide. We decided to use data of approximately 150 countries, for approximately 20 years. In this way we will be able to do not miss some trend or to do not being deceived from some outliers years or random trends. Coming back to the explanatory variables they are divided in 3 categories, each one with some sub-categories: environment(Air Pollution), lifestyle(Smoking, Obesity, Alcohol), socioeconomic/demographic condition (GDP of the country and Age). We are trying then to see which of these variables explain better the data that we have. Before performing the actual linear regression, let’s analyze the data in a visual way, plotting the cancer cases against each of the covariates.
+
+
+```{r}
+mydata = read.csv("Cancer_final.csv")
+data3 = na.omit(mydata)
+
+plot(Cancer ~ Smoking, data=data3)
+
+plot(Cancer ~ Age, data=data3)
+
+plot(Cancer ~ Obesity, data=data3)
+
+plot(Cancer ~ Alcool, data=data3)
+
+plot(Cancer ~ GDP, data=data3)
+
+plot(Cancer ~ AirPoll, data=data3)
+
+#plot(Age ~ GDP, data=data3)
+```
+
+From this simple data visualization, we can see that we can identify some sort of relation between cancer cases and some of our explanatory variables, still as not strong as we imagined before doing those plots. We can see that age is the factor which presents a stronger correlation visually. We also have some outliers, which are Canada and US, but we will analyze this further in the limitation of our study. Now, let’s proceed with the last step before performing the actual multiple linear regression: we will see if the assumptions on the data are met. Let’s check for the normality and for the homoscedasticity of the residuals.
+
+
+
+```{r}
+#Normality of the residuals
+model = lm( Cancer~ Smoking + Obesity + GDP + Age + AirPoll + Alcool, data = data3)
+#ols_plot_resid_qq(model)
+fit2 = lm(Cancer ~ AirPoll, data = data3)
+summary(fit2)
+
+ols_test_normality(model)
+#ols_test_correlation(model)
+## [1] 0.8482072
+#ols_plot_resid_hist(model)
+kop = residuals.lm(model)
+hist(kop, breaks = 50)
+
+
+#homoscedasticity of the residuals
+plot(model)
+
+```
+
+ Let’s analyze each of the test we performed above, and let’s see which conclusion we can take from what we observed. About the model, we can see that the p-value of the tests is low for all of them, thus we can reject the null hypothesis that the errors are normally distributed. Also, for what concern the correlation between observed residuals and expected residuals under normality, the value is satisfactory to assume a strong correlation. The qq-plot shows that the data fit pretty well the diagonal line, exceptions made for a little deviation near the top. Lastly, to check the homoscedasticity we see the plots produced by the function plot(model). All the plots presents a satisfactory result, thus we can conclude that the assumption about homoscedasticity of the result is respected.
+
+Let’s now perform and interpret the result of the multiple linear regression.
+
+```{r}
+mydata = read.csv("Cancer_final.csv")
+data3 = na.omit(mydata)
+
+#plot(AirPoll~Obesity, data=data3)
+fit = lm( Cancer ~  Age + Smoking + GDP + Obesity + Alcool , data = data3)
+fit
+
+summary(fit)
+```
+
+From just these results, we can see various things: the value of the Adjusted R-Squared is satisfying, and then this model fits pretty well the data, telling us there is a quite good linear relationship. Also, all the variables seems to explain pretty well the number of cancer case: all of the p-values are statistically significant! The value that more explain our variable is the Age(not surprisingly I would say). On the other hand, if we try for example just to consider data coming from just one year, the results are pretty surprising
+
+
+```{r}
+data4 = subset(data3, Year == "2005")
+fit2 = lm( Cancer ~ Alcool + GDP + Obesity + Age + Smoking + AirPoll, data = data4)
+fit2
+
+summary(fit2)
+
+#fin = subset(mydata, select = c(Entity,Year,Cancer,Smoking))
+#fan = na.omit(fin)
+#fit2 = lm (Cancer ~ Smoking, data= fin)
+#fit2
+#summary(fit2)
+#plot(Cancer ~ Smoking, data=fin)
+#abline(fit2, col="blue", lwd=2)
+
+
+```
+
+In this case it seems that some of the variables do not correlate well! We can try the conclusion that the subset of the dataset we are considering ( just one year ) is not satisfying to take some satisfactory conclusion. This makes perfectly sense considering the context we are working on, since we should take in consideration also the time dependence. `Let’s take an extreme case as an example: if all of the population of a country starts to smoke instantaneously, the cancer cases for some years will remain quite constant, and if analyzing the data relating to just a short period of time, you would see that there is not a positive correlation between cancer and smoking, which does not make any sense! This test that we just carried out was just a demonstration of the fact that we should be very careful to draw conclusions instinctively.
+
+## Model Selection
+Now that we discussed the linear model we want to do some basic model selection to see
+
+We start by importing the data we will need for the model selection and loading some useful libraries. We will then create our linear model using all the explanatory variables and the dataset without the missing values
+
+```{r}
+library(olsrr) #This stands for Ordinary Least SquaRe Regression and it has the tools needed
+Cancermodelsel = read.csv("Cancer_final_noNA.csv")
+model = lm( Cancer ~ Smoking + Obesity + GDP + Age + AirPoll + Alcool, data = data3)
+summary(model)
+```
+
+Using testing methods we proceed with a Step-up method:
+
+```{r}
+frwfit <- ols_step_forward_p(model, pent = 0.05)
+frwfit
+```
+
+The selection led us to retain all our covariates but the one about Smoke. To cross check it, let's use the symmetrical method, the Step-down method:
+
+```{r}
+bkwfit <- ols_step_backward_p(model, prem = 0.05)
+bkwfit
+```
+
+As you can see we got the same result here.  
+To do one last check using testing methods we use a mixed method to allow variables that were added in previous steps to be excluded in succeding steps (this wasn't allowed in the simple forward/step-up method)
+
+```{r}
+bothfit <- ols_step_both_p(model, pent = 0.05, prem = 0.05)
+bothfit
+```
+But this again yield the same result as the one we got with the step foreward method. This seems to suggest a model of four variables that is cutting our Smoking and Obesity as these two risk factor are removed by all three of our greedy methods.
+
+##Limitations of the study
+
+
+##Conclusions
+
+
+
+
+
+##SITOGRAPHY AND REFERENCES
+https://www.who.int/news-room/fact-sheets/detail/cancer
+
+The sources used for the datas are:
+- Cancer -> [Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2017 (GBD 2017) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2018](http://ghdx.healthdata.org/gbd-results-tool)
+- Air_pollution -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
+- Alcool -> [Food and Agriculture Organization of the United Nations (FAO) (2017)](http://www.fao.org/faostat/en/?#data/)
+- GDP_per_capta -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
+- Obesity -> [World Health Organization (WHO)](http://apps.who.int/gho/data/view.main.REGION2480A?lang=en)
+- Old_age_dependency -> [World Development Indicators - World Bank](http://data.worldbank.org/data-catalog/world-development-indicators)
+- Smoking -> [Nationally representative sources, survey data](http://ghdx.healthdata.org/record/global-smoking-prevalence-and-cigarette-consumption-1980-2012)
