@@ -131,7 +131,7 @@ model = lm( Cancer~ Smoking + Obesity + GDP + Age + AirPoll + Alcool, data = dat
 fit2 = lm(Cancer ~ AirPoll, data = data3)
 summary(fit2)
 
-#ols_test_normality(model)
+ols_test_normality(model)
 #ols_test_correlation(model)
 ## [1] 0.8482072
 #ols_plot_resid_hist(model)
