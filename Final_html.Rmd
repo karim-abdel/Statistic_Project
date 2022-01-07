@@ -1,6 +1,6 @@
 ---
-title: "FinalPaper_lollo"
-author: "Lollo"
+title: "FinalPaper html version"
+author: "Lollo, Prince"
 date: "5/1/2022"
 output: 
   html_document:
@@ -17,20 +17,22 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 
 # Introduction and research question 
 
-Life-Expectancy has constantly increased over the last centuries, and it has never been so high as nowadays. Medicine has taken great strides forward, eradicating and finding cures for a lot of mortal diseases. Having said that, there are still other big challenges that we have to face in medicine and one of those is for sure cancer. [Cancer is a leading cause of death all over the world, accounting for almost 10 milion deaths in 2020](https://www.who.int/news-room/fact-sheets/detail/cancer). 
-This is the reason why we thought that would be very interesting to analyze the principal factors that, according to state-of-the-art scientific research, cause this disease. We also wanted to divide these factors in some macro-groups of variables: environmental, life-style related and socio-economical/demographic. 
+Life-Expectancy has constantly increased over the last centuries, and it has never been so high as nowadays. Medicine has taken great strides forward, eradicating and finding cures for a lot of mortal diseases. Having said that, there are still other big challenges that we have to face in medicine and one of those is for sure cancer. [Cancer is a leading cause of death all over the world, accounting for almost 10 million deaths in 2020](https://www.who.int/news-room/fact-sheets/detail/cancer). 
 
-Our analysis (purely statistical) aims to verify if it is indeed possible using data about the selected risk factors to predict the share of people with cancer in a given year and in a given country. Moreover, we tried to improve our all-inclusive model by finding out the best model out of the above mentioned factors
+This is the reason why we thought that would be very interesting to analyze the principal factors that, according to state-of-the-art scientific research,  cause this disease. We also wanted to divide these factors into some macro-groups of variables: environmental, lifestyle-related, and socio-economical/demographic. 
 
-#Dataset, Data Cleaning and Data Visualization
+Our analysis (purely statistical) aims to verify if it is indeed possible to use data about the selected risk factors to predict the share of people with cancer in a  given year and a given country. Moreover, we tried to improve our all-inclusive model by finding the best model out of the above-mentioned factors. 
 
-##Source
+
+# Dataset, Data Cleaning and Data Visualization
+
+## Source
 
 Our research started by searching out on some reliable websites what are the leading causes of cancer and dividing them into the macro-categories. To do that we adopted the [WHO official website](https://www.who.int/news-room/fact-sheets/detail/cancer) and we selected the following risk factors:
 
-*ENVIRONMENTAL*: Air pollution 
-*LIFE-STYLE RELATED*: Alcohol consumption, Tobacco consumption, Obesity 
-*SOCIO-ECONOMICAL/DEMOGRAPHIC*: GDP, Share of old people
+- *ENVIRONMENTAL*: Air pollution 
+- *LIFE-STYLE RELATED*: Alcohol consumption, Tobacco consumption, Obesity 
+- *SOCIO-ECONOMICAL/DEMOGRAPHIC*: GDP, Share of old people
 
 (IMPORTANT DISCLAMER: of course the factors defined under "Socio-Economical/Demographic" cannot be considered to __cause__ cancer, but as we will see they turn out to be very useful to model cancer all over the world and over time)
 
@@ -61,8 +63,8 @@ the proportion of dependents per 100 working-age population.
 
 **Smoking**: Share of population who smoke every day
 
-##Constructing the table
-We started by loading all the different csv files. Then we took the column we were interested in and we glued them together. After some other little manipulation (see the R code for that) here is how part of the final table looks like (the complete table with the N.A.s results in a dimension of 6468x11):
+## Constructing the table
+We started by loading all the different csv files. Then we took the column we were interested in and we glued them together. After some other little manipulation here is how part of the final table looks like (the complete table with the N.A.s results in a dimension of 6468x11):
 
 ```{r}
 ##We start by loading some useful libraries that we will need during this process
@@ -118,12 +120,13 @@ Cancer_final
 write.csv(Cancer_final, "Cancer_final.csv", row.names=FALSE, quote=FALSE) #to save the file into our environment
 ```
 
-##Data Visualization
+## Data Visualization
 Now we will proceed with some plotting. Again, for the detailed process for making this graphs please refer to the R script. You may also want to check our our file in Html format, in which we made some nice animation to be able to display the evolution in time of the variables.
 
 We start by displaying the variable we are interested to explain, that is the share of population with any form of cancer. We chose to plot the most recent year in our data frame, that is 2017. 
 As we can clearly see form the plot below the countries in which are suffering more (in percentage) of cancer are USA, Canada, Australia and Greenland. These states are followed by European countries. Asian and African countries are the ones with relatively less cases of cancer in percentage. 
-Here we could argue that a big downside of this picture is the fact that different countries have different ability in the process of screening. As the WHO writes "Late-stage presentation and lack of access to diagnosis and treatment are common, particularly in low- and middle-income countries". We will further discuss this limitation in the dedicated section. 
+Here we could argue that a big downside of this picture is the fact that different countries have different ability in the process of screening. As the WHO writes ["Late-stage presentation and lack of access to diagnosis and treatment are common, particularly in low- and middle-income countries"](https://www.who.int/news-room/fact-sheets/detail/cancer) and we will further discuss this limitation in the dedicated section.
+
 (Countries for which data were not available are omitted from the map, but those are luckily few)
 
 ```{r}
@@ -171,11 +174,15 @@ animate(graphPoll, height = 500, width = 800, fps = 30, duration = 15, end_pause
 anim_save("Share with cancer world.gif")
 ```
 
+ -> This is not the file you would get running the code, but its static version, My computer just doesn't have enough computational power to produce this animation and shuts down when I try to create the animation : (
+ if you want to buy me a new MacBook Pro 16'' with the M1 MAX chip feel free to contact me
+ 
 ```{r, echo=FALSE}
-knitr::include_graphics("Share with cancer world.gif") #We use it to display the graphic
+knitr::include_graphics("Share of people with cancer in 2017.jpg") #We use it to display the graphic
 ```
 
 Now we are going to explore the dataset by plotting each selected factor against the Cancer one to start having an idea of some possible relation. Because we selected them as "risk factors" we would expect to see some positive correlation going on. To be consistent with what we have done above we again plot the graphs relative to the year 2017. We also used some libraries to make plots nicer by coloring the points according to the continent and by changing the size according to the population of the country. 
+
 The result is the following:
 
 ```{r}
@@ -313,12 +320,11 @@ Our hypothesis is confirmed by these graphs: evidently there's some sort of posi
 
 We also have some outliers, which are Canada and US (The two orange points that on each graph are above the others). Being cancer causes such a complicated and intricate thing, is actually quite difficult to really understand why those two countries have such an high number of cases. We can suppose that these two countries perform a more intense screening activity, but this goes beyond the scope of this study. We will just delete these two countries from our data set. Having said that, the result that follow will be not significantly changed by this action.
 
-## Multivariate Linear Regression
+# Multivariate Linear Regression
 
-We are now going to perform a multivariate linear regression, trying to examine the relationship between some explanatory variable and one response variable. As mentioned before, we are going to take into consideration as explanatory variables all the factors selected to help us trying to explain part of the variance of the share of people affected by cancer worldwide. The table used is considering approximately 150 countries for approximately 20 years. In this way we will be able to do not miss some trend or to do not being deceived from some outliers years/countries or random trends. 
+We are now going to perform a multivariate linear regression,  trying to examine the relationship between some explanatory variables and one response variable. As mentioned before, we are going to take into consideration as explanatory variables all the factors selected to help us try to explain part of the variance of the share of people affected by cancer worldwide. The table used is considering approximately 150 countries for approximately 20 years. In this way, we will be able to do not miss some trend or to do not be deceived by some outliers years/countries or random trends.
 
-
-Now, let’s proceed with performing the actual multiple linear regression. After that, we want to see if the assumptions required to state the statistical significance are met: we'll check for the normality and for the homoscedasticity of the residuals.
+Now, let’s proceed with performing the actual multiple linear regression. After that, we want to see if the assumptions required to state the statistical significance are met: we’ll check for the normality and the homoscedasticity of the residuals.
 
 
 ```{r}
@@ -329,7 +335,7 @@ mydata = read.csv("Cancer_final.csv")
 data5 = na.omit(mydata)
 
 # Delete USA and Canada from the data set
-data3 = subset(data5, Entity != "USA" || Entity != "Canada")
+data3 = subset(data5, Entity != "USA")
 
 #Normality of the residuals
 model = lm( Cancer~ Smoking + Obesity + GDP + Age + AirPoll + Alcool, data = data3)
@@ -346,7 +352,7 @@ plot(model)
 
 ```
 
- Let’s analyze each of the test we performed above and see which conclusion we can take from what we observed. 
+Let’s analyze each of the test we performed above and see which conclusion we can take from what we observed. 
 For what concerns normality of the residuals, we can see that the p-value of the tests we performed is below the 0.05 significance level for all of them, thus we can reject the null hypothesis that the errors are normally distributed. This is exactly as we imagined: the data set is made by more or less  1000 data points, thus violating this assumption was something that we expected for. This is due to the fact that with this many data points it's easy for the testing methods to find evidence against normality.
 Trying to see the situation graphically, the situations seems a bit better. The qq-plot shows that the data fit not that badly the diagonal line, exceptions made for a little deviation near the top-right. Furthermore, analyzing another graph we see that plotting the residuals against the fitted values approximates more or less a straight line. The analysis of the residuals is enough satisfying, but if we want to be strict we will say that we are not able to take out any significant conclusions from the experiment we will carry on.
 
@@ -361,7 +367,7 @@ relationship with the covariates we indicated: our factors explain a 82% varianc
 In addition, all the variables seem to explain pretty well the share of cancer cases:almost all of the p-values are statistically significant! The only exception is given by the "Obesity" explanatory variable.
 
 
-## Model Selection (Testing)
+# Model Selection (Testing)
 
 Now that we discussed the linear model and the underlying characteristics, we want to do some basic model selection to see if there are other models (possibly simpler) that are able to explain the dependent variable well enough. To do that we will leverage on two different approach to model selection. The first is the one provided by testing and the other the one provided by information theory. We will compare the results and see whether they coincide or not.
 
@@ -414,26 +420,35 @@ With small models AIC can easily prefer the complete model as the gain in "expla
 
 We conclude this section by saying that the best model after this analysis is the one with four explanatory variable, obtained with the three step-wise method
 
-## Limitations of the study and Conclusions
-
+# Limitations of the study and Conclusions
 Based on the results of our study, we can conclude that our last model explains quite well the variance in the data and that we collected about cancer and that some factors (for sure including the ones selected by us) are more influential than others in explaining the share of people suffering of cancer in a given country.
-Relatively older and richer countries (the two things often overlap) present many more cancer cases than the others and the same we can conclude of countries with a consumption of alcohol and cigarettes above the mean. However, our study has a lot of limitations that we have to indicate. First, as we had to construct the data set by our own, we encountered some difficulties: we joined some data together into a table, but obviously we had some missing data. It's not easy even just to collect the data in the same way for all the countries for more than 25 year for all those factors. 
-In addition, we have to consider the difference in data availability that is present among the countries. To give an example: it's much easier to find a data set about a given topic regarding the USA with respect to one regarding Burkina Faso.
+Relatively older and richer countries (the two things often overlap) present many more cancer cases in percentage than the others and the same we can conclude of countries with a consumption of alcohol and cigarettes above the mean. However, our study has a lot of limitations that we have to indicate. 
+- First, as we had to construct the data set by our own, we encountered some difficulties: we joined some data together into a table, but obviously we had some missing data. It's not easy even just to collect the data in the same way for all the countries for more than 25 year for all those factors! 
+- Secondly, we have to consider the difference in data availability that is present among the countries. To give an example: it's much easier to find a data set about a given topic regarding the USA with respect to one regarding Burkina Faso.
 Besides that, we have taken into considerations just six factors to try to explain cancer incidence, but as we know it is a much more difficult research question: genetical heritage, other factors of concerning lifestyle, other environmental elements, access to the healthcare system, prevention and treatment offered by the country and many more things play a role in developing a cancer or not. 
-Moreover, it is not an 'immediate' disease: factors of risk sum up over the years and so do progress in medicine. This ends up in a complicated and intricate situation to analyze. 
+- Moreover, it is not an 'immediate' disease: factors of risk sum up over the years and so do progress in medicine. This ends up in a complicated and intricate situation to analyze. 
 Diving into some details, we also had a quite surprising result: the correlation between cancer cases and air pollution seems strongly negative, as the plot at the beginning shows. It is difficult to explain such a result, but it may be that since the worst quality of air is on average in less developed countries(eg. Nigeria, Pakistan, India...), it may be that other factors as the demographic distribution of the population or GDP, that typically obtain low values in those countries , have a stronger influence on the actual number of cancer cases, ending in this counter-intuitive result.
+The division that we made at the beginning seems to suggest that the "non-risk factors" are the one better suited to describe the distribution of cases worldwide, but again that's what we wanted for this research: a merely descriptive approach. 
+We conclude by saying that another interesting improvement to this research could be to trying to repeat the same analysis but just focusing on everyday habits and maybe by including the interaction effects within the possible covariates that we will choose in order to provide tips for an healthier routine.
 
 
+### *->Hope many of you got the StatQuest tribute<-*
 
-
-## SITOGRAPHY AND REFERENCES
-https://www.who.int/news-room/fact-sheets/detail/cancer
+# SITOGRAPHY AND REFERENCES
 
 The sources used for the datas are:
+
 - Cancer -> [Global Burden of Disease Collaborative Network. Global Burden of Disease Study 2017 (GBD 2017) Results. Seattle, United States: Institute for Health Metrics and Evaluation (IHME), 2018](http://ghdx.healthdata.org/gbd-results-tool)
+
 - Air_pollution -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
-- Alcool -> [Food and Agriculture Organization of the United Nations (FAO) (2017)](http://www.fao.org/faostat/en/?#data/)
+
+- Alcool -> [Food and Agriculture Organization of the United Nations (FAO)
+(2017)](http://www.fao.org/faostat/en/?#data/)
+
 - GDP_per_capta -> [World Development Indicators - World Bank ](http://data.worldbank.org/data-catalog/world-development-indicators)
+
 - Obesity -> [World Health Organization (WHO)](http://apps.who.int/gho/data/view.main.REGION2480A?lang=en)
+
 - Old_age_dependency -> [World Development Indicators - World Bank](http://data.worldbank.org/data-catalog/world-development-indicators)
+
 - Smoking -> [Nationally representative sources, survey data](http://ghdx.healthdata.org/record/global-smoking-prevalence-and-cigarette-consumption-1980-2012)
