@@ -57,6 +57,6 @@ Reading this is impossible, we use the function best_subset to get the best mode
 ```{r}
 allsub2 <- ols_step_best_subset(model)
 allsub2
-plot(allsub2)
+#plot(allsub2)
 ```
 The result is totally different from the one obtained above. Here six out of seven criteria yield that the more adequate model is the one containing all six covariates. 
