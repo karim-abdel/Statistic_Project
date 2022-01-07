@@ -3,7 +3,7 @@ title: "Research Project"
 author: "Karim Abdel, Lorenzo Tarricone"
 date: "5/1/2022"
 output: 
-  pdf_document:
+  word_document:
     toc: true
     df_print: paged
 ---
