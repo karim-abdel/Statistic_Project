@@ -11,4 +11,4 @@ We proceeded by selecting some risk factors and then by trying to find correlati
 
 So: does smoking really causes cancer (according to our data)? Read the research to find it out!
 
-P.S. Don't forget to check out the [html version][https://lorenzotarricone.github.io/Statistic_Project/Final_html.html]
+P.S. Don't forget to check out the [HTML VERSION](https://lorenzotarricone.github.io/Statistic_Project/Final_html.html)
