@@ -1,7 +1,7 @@
 # Statistic_Project
 ### This is even a more complete version
 
-Project of statistic about modelling cancer causalities. This was made in collaboration by *Lorenzo Tarricone* and *Karim Abdel Sadek*
+Project of statistic about modelling cancer causalities:this was made in collaboration by *Lorenzo Tarricone* and *Karim Abdel Sadek*
 
 This assignment was given by our statistic professor as compulsory project and we decided to push it foreward to try to come out with the best project we could.
 
